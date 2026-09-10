@@ -1,0 +1,50 @@
+[
+  {
+    "rule_id": "PA-001",
+    "category": "Prior Authorization",
+    "text": "Claims for advanced imaging (MRI, CT, PET) require prior authorization on file before the date of service. Claims submitted without an approved PA number will be denied.",
+    "appeal_hint": "Submit the prior authorization approval number if one was obtained retroactively, or request a peer-to-peer review with the ordering physician to establish medical necessity."
+  },
+  {
+    "rule_id": "MN-014",
+    "category": "Medical Necessity",
+    "text": "Services must be supported by documentation establishing medical necessity per current clinical guidelines. Claims lacking sufficient clinical documentation linking diagnosis to treatment will be denied.",
+    "appeal_hint": "Resubmit with additional clinical notes, lab results, or specialist referral letters that directly tie the diagnosis to the treatment rendered."
+  },
+  {
+    "rule_id": "TF-007",
+    "category": "Timely Filing",
+    "text": "Claims must be submitted within 90 days of the date of service. Claims submitted after this window will be denied for untimely filing, absent a documented exception.",
+    "appeal_hint": "If there was a documented delay (e.g., coordination of benefits, late notification of coverage), submit proof of the delay along with a timely filing exception request."
+  },
+  {
+    "rule_id": "NC-022",
+    "category": "Network Coverage",
+    "text": "Services rendered by out-of-network providers are not covered except in documented emergency circumstances or when no in-network provider was available within a reasonable distance.",
+    "appeal_hint": "Provide documentation showing the emergency nature of the visit or that no in-network provider was accessible within the plan's required distance/time standard."
+  },
+  {
+    "rule_id": "DC-031",
+    "category": "Duplicate Claim",
+    "text": "A claim for the same service, same provider, and same date of service has already been processed and paid or is pending. Duplicate submissions will be denied.",
+    "appeal_hint": "Verify the original claim number and confirm this submission includes a corrected claim indicator if it is meant to replace, not duplicate, the prior submission."
+  },
+  {
+    "rule_id": "CD-045",
+    "category": "Coding / Bundling",
+    "text": "The submitted procedure code is considered bundled into a more comprehensive code billed on the same date of service, per standard coding edits (e.g., NCCI). Separate reimbursement is not allowed.",
+    "appeal_hint": "Review whether a modifier (e.g., -59) applies to indicate the service was distinct and separately identifiable, and resubmit with supporting documentation."
+  },
+  {
+    "rule_id": "EL-052",
+    "category": "Eligibility",
+    "text": "Patient was not enrolled in an active plan on the date of service, based on eligibility records at time of adjudication.",
+    "appeal_hint": "Submit proof of active coverage on the date of service (enrollment confirmation, premium payment record) as eligibility records may lag actual enrollment status."
+  },
+  {
+    "rule_id": "RX-060",
+    "category": "Step Therapy",
+    "text": "Plan requires documented trial and failure of a first-line, lower-cost alternative medication before the requested medication will be covered.",
+    "appeal_hint": "Submit documentation of prior medication trials, including dates, dosages, and clinical reason for discontinuation (e.g., adverse reaction, lack of efficacy)."
+  }
+]
