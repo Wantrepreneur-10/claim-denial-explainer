@@ -4,7 +4,7 @@ Paste a claim denial description → the system retrieves the specific payer
 rule that likely caused it, explains why in plain language, and drafts
 appeal guidance — grounded only in the retrieved rule, never invented.
 
-**🔴 Live demo:** `<add your deployed frontend URL here after deploying>`
+**🔴 Live demo:** https://wantrepreneur-10.github.io/claim-denial-explainer/
 
 > ⚠️ **This is a public demo built entirely on synthetic data.** The 8 payer
 > rules in `data/payer_rules.json` are made up for demonstration purposes.
