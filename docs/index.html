@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Claim Denial Explainer — Demo</title>
+<style>
+  :root {
+    --bg: #0b0d10; --panel: #14171c; --border: #262b33;
+    --text: #e7e9ec; --muted: #8a919c; --accent: #4f9d6e; --warn: #d98c3f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    display: flex; justify-content: center; padding: 40px 16px;
+  }
+  .wrap { width: 100%; max-width: 760px; }
+  h1 { font-size: 22px; margin-bottom: 4px; }
+  p.sub { color: var(--muted); margin-top: 0; font-size: 14px; }
+  .disclaimer {
+    background: #2a2210; border: 1px solid #4a3a12; color: #e0c07a;
+    padding: 10px 14px; border-radius: 8px; font-size: 12.5px; margin: 16px 0;
+    line-height: 1.5;
+  }
+  #config { display: flex; gap: 8px; margin-bottom: 16px; }
+  #apiUrl {
+    flex: 1; padding: 8px 10px; background: var(--panel); border: 1px solid var(--border);
+    color: var(--text); border-radius: 6px; font-size: 13px;
+  }
+  textarea {
+    width: 100%; min-height: 110px; padding: 12px; background: var(--panel);
+    border: 1px solid var(--border); color: var(--text); border-radius: 8px;
+    font-size: 14px; font-family: inherit; resize: vertical;
+  }
+  .examples { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 16px; }
+  .example-btn {
+    background: #1c2028; border: 1px solid var(--border); color: var(--muted);
+    padding: 6px 10px; border-radius: 6px; font-size: 12px; cursor: pointer;
+  }
+  .example-btn:hover { color: var(--text); border-color: var(--accent); }
+  button.submit {
+    padding: 12px 20px; background: var(--accent); color: white; border: none;
+    border-radius: 8px; font-size: 14px; cursor: pointer; margin-top: 4px;
+  }
+  button.submit:disabled { opacity: 0.5; cursor: not-allowed; }
+  #result { margin-top: 24px; display: none; }
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px; margin-bottom: 12px;
+  }
+  .card h3 { margin: 0 0 8px; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+  .rule-badge {
+    display: inline-block; background: #22304d; color: #9db6ff; font-size: 11px;
+    padding: 3px 8px; border-radius: 5px; margin-bottom: 8px; font-family: monospace;
+  }
+  .meta { font-size: 11px; color: var(--muted); margin-top: 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📋 Claim Denial Explainer</h1>
+  <p class="sub">Paste a denial description → retrieves the matching payer rule and explains it in plain language.</p>
+
+  <div class="disclaimer">
+    ⚠️ <strong>Demo notice:</strong> This uses 8 entirely synthetic payer rules (view them at <code>/rules</code> on the backend) — no real claims, no real PHI, no connection to any real insurer. This is not medical or legal advice. It's a working demonstration of a retrieval + grounded-explanation pattern for denial-reason matching.
+  </div>
+
+  <div id="config">
+    <input id="apiUrl" type="text" placeholder="Backend URL, e.g. https://your-app.onrender.com" />
+  </div>
+
+  <textarea id="denialText" placeholder="Paste or type a denial description here..."></textarea>
+
+  <div class="examples">
+    <span style="font-size:12px;color:var(--muted);align-self:center;">Try:</span>
+    <button class="example-btn" data-text="The MRI claim was denied because there was no prior authorization approval on file before the scan.">Prior auth</button>
+    <button class="example-btn" data-text="Claim was submitted 120 days after the date of service.">Timely filing</button>
+    <button class="example-btn" data-text="Out of network provider was used for a routine, non-emergency visit.">Out of network</button>
+    <button class="example-btn" data-text="Requested brand-name medication was denied because no lower-cost alternative was tried first.">Step therapy</button>
+  </div>
+
+  <button class="submit" id="submitBtn">Explain this denial</button>
+
+  <div id="result">
+    <div class="card">
+      <h3>Matched Rule</h3>
+      <div id="ruleBadge" class="rule-badge"></div>
+      <div id="ruleText"></div>
+    </div>
+    <div class="card">
+      <h3>Explanation</h3>
+      <div id="explanation"></div>
+    </div>
+    <div class="card">
+      <h3>Appeal Guidance</h3>
+      <div id="appealGuidance"></div>
+    </div>
+    <div class="meta" id="meta"></div>
+  </div>
+</div>
+
+<script>
+  const apiUrlInput = document.getElementById('apiUrl');
+  apiUrlInput.value = localStorage.getItem('denial_api_url') || '';
+
+  document.querySelectorAll('.example-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('denialText').value = btn.dataset.text;
+    });
+  });
+
+  document.getElementById('submitBtn').addEventListener('click', async () => {
+    const apiUrl = apiUrlInput.value.trim().replace(/\/$/, '');
+    if (!apiUrl) { alert('Enter the backend URL first (see README for deployment).'); return; }
+    localStorage.setItem('denial_api_url', apiUrl);
+
+    const text = document.getElementById('denialText').value.trim();
+    if (!text) return;
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Analyzing...';
+
+    try {
+      const res = await fetch(apiUrl + '/explain', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ denial_text: text })
+      });
+      const data = await res.json();
+
+      document.getElementById('result').style.display = 'block';
+      document.getElementById('ruleBadge').textContent = data.matched_rule_id
+        ? `${data.matched_rule_id} — ${data.matched_category}` : 'No confident match';
+      document.getElementById('ruleText').textContent = data.matched_rule_text || '—';
+      document.getElementById('explanation').textContent = data.explanation;
+      document.getElementById('appealGuidance').textContent = data.appeal_guidance;
+      document.getElementById('meta').textContent =
+        `similarity ${data.similarity} · mode: ${data.mode} · ${data.latency_ms}ms · trace ${data.trace_id.slice(0,8)}`;
+    } catch (err) {
+      alert('Error contacting backend: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Explain this denial';
+    }
+  });
+</script>
+</body>
+</html>
